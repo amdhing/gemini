@@ -205,13 +205,13 @@ class Gemini:
 
         # STATISTICS
         longs = len(
-            [t for t in self.account.opened_trades if t.type_ == 'Long'])
+            [t for t in self.account.opened_trades if t.type_ == 'long'])
         sells = len(
-            [t for t in self.account.closed_trades if t.type_ == 'Long'])
+            [t for t in self.account.closed_trades if t.type_ == 'long'])
         shorts = len(
-            [t for t in self.account.opened_trades if t.type_ == 'Short'])
+            [t for t in self.account.opened_trades if t.type_ == 'short'])
         covers = len(
-            [t for t in self.account.closed_trades if t.type_ == 'Short'])
+            [t for t in self.account.closed_trades if t.type_ == 'short'])
 
         stat = [
             ("Longs", longs, ""),
@@ -323,13 +323,13 @@ class Gemini:
 
         # STATISTICS
         longs = len(
-            [t for t in self.account.opened_trades if t.type_ == 'Long'])
+            [t for t in self.account.opened_trades if t.type_ == 'long'])
         sells = len(
-            [t for t in self.account.closed_trades if t.type_ == 'Long'])
+            [t for t in self.account.closed_trades if t.type_ == 'long'])
         shorts = len(
-            [t for t in self.account.opened_trades if t.type_ == 'Short'])
+            [t for t in self.account.opened_trades if t.type_ == 'short'])
         covers = len(
-            [t for t in self.account.closed_trades if t.type_ == 'Short'])
+            [t for t in self.account.closed_trades if t.type_ == 'short'])
 
         stat = [
             ("Longs", longs, ""),

@@ -5,7 +5,7 @@ from gemini.gemini_core import engine, helpers
 import pandas as pd
 
 # Build mean reversion strategy
-from talib.abstract import *
+from talib import BBANDS
 
 def bands(df, timeperiod=26, nbdevup=2.6, nbdevdn=2.6, matype=0):
     cols = ['high', 'low', 'open', 'close', 'volume']
