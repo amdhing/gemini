@@ -697,15 +697,18 @@ def sharpe_ratio(returns,
     returns_risk_adj = np.asanyarray(_adjust_returns(returns, risk_free))
     ann_factor = annualization_factor(period, annualization)
 
-    np.multiply(
-        np.divide(
-            nanmean(returns_risk_adj, axis=0),
-            nanstd(returns_risk_adj, ddof=1, axis=0),
-            out=out,
-        ),
-        np.sqrt(ann_factor),
-        out=out,
-    )
+    # Calculate standard deviation and handle division by zero
+    std_dev = nanstd(returns_risk_adj, ddof=1, axis=0)
+    mean_returns = nanmean(returns_risk_adj, axis=0)
+    
+    # Set output to NaN where std_dev is zero or very close to zero
+    with np.errstate(invalid='ignore', divide='ignore'):
+        np.divide(mean_returns, std_dev, out=out)
+        # Handle division by zero cases
+        zero_std_mask = (std_dev == 0) | np.isclose(std_dev, 0)
+        out[zero_std_mask] = np.nan
+    
+    np.multiply(out, np.sqrt(ann_factor), out=out)
     if return_1d:
         out = out.item()
 
@@ -787,7 +790,12 @@ def sortino_ratio(returns,
         if _downside_risk is not None else
         downside_risk(returns, required_return, period, annualization)
     )
-    np.divide(average_annual_return, annualized_downside_risk, out=out)
+    # Handle division by zero for downside risk calculations
+    with np.errstate(invalid='ignore', divide='ignore'):
+        np.divide(average_annual_return, annualized_downside_risk, out=out)
+        # Set to NaN where downside risk is zero or very close to zero
+        zero_risk_mask = (annualized_downside_risk == 0) | np.isclose(annualized_downside_risk, 0)
+        out[zero_risk_mask] = np.nan
     if return_1d:
         out = out.item()
     elif isinstance(returns, pd.DataFrame):
@@ -863,7 +871,7 @@ def downside_risk(returns,
             np.asanyarray(returns),
             np.asanyarray(required_return),
         ),
-        np.NINF,
+        -np.inf,
         0,
     )
 
@@ -1366,10 +1374,10 @@ def beta_aligned(returns, factor_returns, risk_free=0.0, out=None):
 
     returns_1d = returns.ndim == 1
     if returns_1d:
-        returns = returns[:, np.newaxis]
+        returns = np.asarray(returns)[:, np.newaxis]
 
     if factor_returns.ndim == 1:
-        factor_returns = factor_returns[:, np.newaxis]
+        factor_returns = np.asarray(factor_returns)[:, np.newaxis]
 
     N, M = returns.shape
 

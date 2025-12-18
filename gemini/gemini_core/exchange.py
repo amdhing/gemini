@@ -142,7 +142,7 @@ class Account:
             self.fee = fee
 
     def enter_position(self, type_, entry_capital, entry_price, exit_price=0,
-                       stop_loss=0):
+                       stop_loss=0, commission=None):
         """
         Open position
         :param type_:
@@ -159,26 +159,33 @@ class Account:
         elif self.buying_power < entry_capital:
             raise ValueError("Error: Not enough buying power to enter position")
         else:
-            # apply fee to price
-            price_with_fee = self.apply_fee(entry_price, type_, 'Open')
-
-            # round shares and calculate position capital
-            size = rnd(entry_capital / price_with_fee)
-            pos_amount = rnd(entry_price * size)
-
-            # calculate trading fee for position
-            trade_fee = rnd(pos_amount * self.fee.get(type_, 0))
-            # calc buying power
-            self.buying_power -= pos_amount + trade_fee
+            # Use commission parameter if provided, otherwise use fee dictionary
+            fee_rate = commission if commission is not None else self.fee.get(type_, 0)
+            
+            # entry_capital is the total amount to spend INCLUDING fees
+            # Calculate the actual position value after fees
+            if fee_rate > 0:
+                actual_investment = rnd(entry_capital / (1 + fee_rate))
+            else:
+                actual_investment = entry_capital
+            
+            # calculate shares based on actual investment amount
+            size = rnd(actual_investment / entry_price)
+            
+            # calculate effective fee 
+            effective_fee = rnd(entry_capital - actual_investment)
+            
+            # deduct total entry capital (includes fees)
+            self.buying_power -= entry_capital
 
             if type_ == 'long':
                 position = LongPosition(
-                    self.number, entry_price, size, trade_fee, exit_price,
+                    self.number, entry_price, size, effective_fee, exit_price,
                     stop_loss)
 
             elif type_ == 'short':
                 position = ShortPosition(
-                    self.number, entry_price, size, trade_fee, exit_price,
+                    self.number, entry_price, size, effective_fee, exit_price,
                     stop_loss)
 
             else:
@@ -186,10 +193,10 @@ class Account:
 
             self.positions.append(position)
             self.opened_trades.append(
-                OpenedTrade(type_, self.date, entry_price, size, trade_fee))
+                OpenedTrade(type_, self.date, entry_price, size, effective_fee))
             self.number += 1
 
-    def close_position(self, position, percent, price):
+    def close_position(self, position, percent, price, commission=None):
         """
         close position
         :param position:
@@ -209,16 +216,33 @@ class Account:
         elif price < 0:
             raise ValueError("Error: Current price cannot be negative.")
         else:
-            # get trade fee
-            # FIXME Use type by direction: buy-Long, sell-Short
-            trade_fee = rnd(
-                price * position.shares * self.fee.get(position.type_, 0))
+            # Use commission parameter if provided, otherwise use fee dictionary
+            fee_rate = commission if commission is not None else self.fee.get(position.type_, 0)
+            
+            # apply fee to closing price (fees are built into execution price)
+            if fee_rate > 0:
+                if position.type_ == 'long':
+                    price_with_fee = rnd(price * (1 - fee_rate))  # Long close: subtract fee
+                elif position.type_ == 'short':
+                    price_with_fee = rnd(price * (1 + fee_rate))  # Short close: add fee
+                else:
+                    price_with_fee = price
+            else:
+                price_with_fee = price
+            
+            # calculate effective fee for tracking (difference between market and execution price)
+            shares_to_close = position.shares * percent
+            market_proceeds = rnd(price * shares_to_close)
+            actual_proceeds = rnd(price_with_fee * shares_to_close)
+            effective_fee = rnd(abs(market_proceeds - actual_proceeds))
 
             self.closed_trades.append(
                 ClosedTrade(position.type_, self.date,
-                            position.shares * percent,
-                            position.entry_price, price, trade_fee))
-            self.buying_power += position.close(percent, price) - trade_fee
+                            shares_to_close,
+                            position.entry_price, price_with_fee, effective_fee))
+            
+            # use the price_with_fee for closing (fees already built in)
+            self.buying_power += position.close(percent, price_with_fee)
 
     def apply_fee(self, price, type_, direction):
         """

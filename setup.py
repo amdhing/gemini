@@ -10,7 +10,7 @@ with open('LICENSE') as f:
 
 setup(
     name='gemini',
-    version='1.0.6',
+    version='1.0.7',
     description='Backtesting for sleepless cryptocurrency markets',
     long_description=readme,
     url='https://github.com/anfederico/gemini',

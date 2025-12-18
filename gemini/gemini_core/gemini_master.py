@@ -121,7 +121,7 @@ class Gemini:
             # Cleanup empty positions
             self.account.purge_positions()
         self.results()
-        self.analyze(self, **kwargs)
+        self.analyze(**kwargs)
 
     def results(self):
         """
@@ -149,13 +149,13 @@ class Gemini:
         str_fmt = "{0:<13}: {1:.2f}{2}"
 
         # BENCHMARK
-        percent_change = helpers.percent_change(self.data['base_equity'][0],
-                                                self.data['base_equity'][-1])
+        percent_change = helpers.percent_change(self.data['base_equity'].iloc[0],
+                                                self.data['base_equity'].iloc[-1])
 
         benchmark = self.data['base_equity'].pct_change()
         bench = [
             ("Capital", self.account.initial_capital, ""),
-            ("Final Equity", self.data['base_equity'][-1], ""),
+            ("Final Equity", self.data['base_equity'].iloc[-1], ""),
             ("Net profit",
              helpers.profit(self.account.initial_capital, percent_change), " ({:+.2f}%)".format(percent_change * 100)),
             ("Max Drawdown",
@@ -169,8 +169,8 @@ class Gemini:
             results_history.write(str_fmt.format(*r) + '\n')
 
         # STRATEGY
-        percent_change = helpers.percent_change(self.data['equity'][0],
-                                                self.data['equity'][-1])
+        percent_change = helpers.percent_change(self.data['equity'].iloc[0],
+                                                self.data['equity'].iloc[-1])
         open_fee = sum([t.fee for t in self.account.opened_trades])
         close_fee = sum([t.fee for t in self.account.closed_trades])
 
@@ -180,7 +180,7 @@ class Gemini:
         returns = self.data['equity'].pct_change()
         strategy = [
             ("Capital", self.account.initial_capital, ""),
-            ("Final Equity", self.data['equity'][-1], ""),
+            ("Final Equity", self.data['equity'].iloc[-1], ""),
             ("Net profit",
              helpers.profit(self.account.initial_capital, percent_change),
              " ({:+.2f}%)".format(percent_change * 100)),
@@ -267,13 +267,13 @@ class Gemini:
         str_fmt = "{0:<13}: {1:.2f}{2}"
 
         # BENCHMARK
-        percent_change = helpers.percent_change(self.data['base_equity'][0],
-                                                self.data['base_equity'][-1])
+        percent_change = helpers.percent_change(self.data['base_equity'].iloc[0],
+                                                self.data['base_equity'].iloc[-1])
 
         benchmark = self.data['base_equity'].pct_change()
         bench = [
             ("Capital", self.account.initial_capital, ""),
-            ("Final Equity", self.data['base_equity'][-1], ""),
+            ("Final Equity", self.data['base_equity'].iloc[-1], ""),
             ("Net profit",
              helpers.profit(self.account.initial_capital, percent_change), " ({:+.2f}%)".format(percent_change * 100)),
             ("Max Drawdown",
@@ -287,8 +287,8 @@ class Gemini:
             results_history.write(str_fmt.format(*r) + '\n')
 
         # STRATEGY
-        percent_change = helpers.percent_change(self.data['equity'][0],
-                                                self.data['equity'][-1])
+        percent_change = helpers.percent_change(self.data['equity'].iloc[0],
+                                                self.data['equity'].iloc[-1])
         open_fee = sum([t.fee for t in self.account.opened_trades])
         close_fee = sum([t.fee for t in self.account.closed_trades])
 
@@ -298,7 +298,7 @@ class Gemini:
         returns = self.data['equity'].pct_change()
         strategy = [
             ("Capital", self.account.initial_capital, ""),
-            ("Final Equity", self.data['equity'][-1], ""),
+            ("Final Equity", self.data['equity'].iloc[-1], ""),
             ("Net profit",
              helpers.profit(self.account.initial_capital, percent_change),
              " ({:+.2f}%)".format(percent_change * 100)),
