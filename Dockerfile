@@ -1,6 +1,6 @@
 FROM python:3.6-alpine
 
-MAINTAINER Anthony Federico <https://github.com/anfederico>
+MAINTAINER Aman Dhingra <https://github.com/amdhing>
 
 RUN apk update
 RUN apk add musl-dev wget git build-base

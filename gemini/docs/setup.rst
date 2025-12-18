@@ -18,7 +18,7 @@ Currently the best way to using Gemini is to clone the Github repository.
 
 .. code-block:: bash
 
-    git clone https://github.com/anfederico/Gemini
+    git clone https://github.com/amdhing/gemini
 
 
 Quick Example

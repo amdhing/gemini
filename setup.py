@@ -13,7 +13,7 @@ setup(
     version='1.0.7',
     description='Backtesting for sleepless cryptocurrency markets',
     long_description=readme,
-    url='https://github.com/anfederico/gemini',
+    url='https://github.com/amdhing/gemini',
     license=license,
     packages=find_packages(exclude=('tests', 'docs'))
 )
